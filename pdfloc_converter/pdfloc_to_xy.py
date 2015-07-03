@@ -3,7 +3,6 @@ import sys
 import codecs
 
 from pdfminer.pdfparser import PDFParser
-
 from pdfminer.pdfdocument import PDFDocument
 
 from pdfloc_converter.converter import PDFLocConverter
