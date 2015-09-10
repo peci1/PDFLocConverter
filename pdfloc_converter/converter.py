@@ -21,10 +21,12 @@ class PDFLocConverter(object):
         CPU time and resources needed for parsing if only a small part of the document
         is needed.
 
-        :param document: Either a prepared PDFDocument, or a string denoting a filename.
+        :param document: Either a prepared PDFDocument, open file, or a string denoting a filename.
                          If a PDFDocument is given, the underlying parser's source stream
                             needs to be open for reading/seeking until parse_document()
                             is called.
+                         If an open file is given, the PDFDocument is created here internally,
+                            and the file is closed as soon as parse_document() finishes.
                          If a filename is given, the PDFDocument is created here internally,
                             and the stream is closed as soon as parse_document() finishes.
         :type document: PDFDocument | basestring
@@ -49,6 +51,12 @@ class PDFLocConverter(object):
             self.__source_file_handle = file(document, 'rb')
             parser = PDFParser(self.__source_file_handle)
             self._pdf_document = PDFDocument(parser)
+        elif type(document) == file:
+            self.__source_file_handle = document
+            parser = PDFParser(self.__source_file_handle)
+            self._pdf_document = PDFDocument(parser)
+        else:
+            raise ValueError("Unsupported PDF document argument given: %s" % repr(document))
 
         self._pdfloc_document = None
         self._only_pages = None

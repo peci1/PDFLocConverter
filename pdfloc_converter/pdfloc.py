@@ -69,6 +69,12 @@ class PDFLoc(object):
     def is_not_up_to_end(self):
         return self._is_not_up_to_end
 
+    def __str__(self):
+        return "#pdfloc(%s,%d,%d,%d,%d,%d,%d,%d)" % (
+            self.hash, self.page, self.keyword_num, self.string_num, self.instring_num, self.flag1,
+            self.is_up_to_end, self.is_not_up_to_end
+        )
+
 
 class PDFLocPair(object):
     def __init__(self, start, end):
@@ -79,6 +85,9 @@ class PDFLocPair(object):
     @property
     def pages_covered(self):
         return range(self.start.page, self.end.page+1)
+
+    def __str__(self):
+        return str(self.start) + ";" + str(self.end)
 
 
 class PDFLocBoundingBoxes(object):
@@ -112,4 +121,9 @@ class BoundingBoxOnPage(object):
         self.text = text
 
     def __repr__(self):
-        return "Page %i, '%s', %s" % (self.page, self.text.encode("ascii", "ignore"), str(self.bbox))
+        return "Page %i, '%s', %s" % (self.page, str(self.bbox), self.text.encode("ascii", "ignore"))
+
+    def __str__(self):
+        return self.__repr__()
+
+
