@@ -3,7 +3,7 @@ import collections
 import logging
 
 from pdfminer.converter import PDFPageAggregator
-from pdfminer.layout import LTContainer, LTChar, LTTextLine, LTText, LTPage
+from pdfminer.layout import LTContainer, LTChar, LTTextLine, LTText, LTPage, LTFigure
 from pdfminer.pdfinterp import PDFPageInterpreter, PDFInterpreterError, LITERAL_FORM
 from pdfminer.pdftypes import stream_value, list_value, dict_value
 from pdfminer.psparser import literal_name, STRICT
@@ -147,6 +147,37 @@ class PDFLocPage(LTPage):
                 self._set_as_layout_parent(child, grandchild, i)
                 i += 1
 
+class PDFLocFigure(LTFigure):
+
+    def __init__(self, name, bbox, matrix):
+        super(PDFLocFigure, self).__init__(name, bbox, matrix)
+
+    def __getitem__(self, item):
+        return self._objs[item]
+
+    def analyze(self, laparams):
+        super(PDFLocFigure, self).analyze(laparams)
+
+        self.layout_parent = None
+        self.layout_children = self.groups
+        self.index_in_layout_parent = 0
+
+        i = 0
+        if self.groups is not None:
+            for child in self.groups:
+                self._set_as_layout_parent(self, child, i)
+                i += 1
+
+    def _set_as_layout_parent(self, parent, child, index_in_layout_parent):
+        child.layout_parent = parent
+        child.layout_children = []
+        child.index_in_layout_parent = index_in_layout_parent
+        if isinstance(child, collections.Iterable):
+            i = 0
+            for grandchild in child:
+                child.layout_children.append(grandchild)
+                self._set_as_layout_parent(child, grandchild, i)
+                i += 1
 
 class PDFLocPageAnalyzer(PDFPageAggregator):
     def __init__(self, rsrcmgr, pageno=1, laparams=None):
@@ -168,6 +199,10 @@ class PDFLocPageAnalyzer(PDFPageAggregator):
         self.cur_item = PDFLocPage(self.cur_item.pageid, self.cur_item.bbox)
         self.text_lines = {}
         self.coords_to_chars = {}
+
+    def begin_figure(self, name, bbox, matrix):
+        super(PDFLocPageAnalyzer, self).begin_figure(name, bbox, matrix)
+        self.cur_item = PDFLocFigure(name, bbox, mult_matrix(matrix, self.ctm))
 
     def render_string(self, textstate, seq):
         self.current_line = self.interpreter.keyword_count+1
