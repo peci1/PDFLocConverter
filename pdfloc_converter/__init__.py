@@ -1,5 +1,1 @@
-#!/usr/bin/env python
-__version__ = '20150610'
-
-if __name__ == '__main__':
-    print (__version__)
+import converter
