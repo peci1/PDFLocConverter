@@ -81,6 +81,7 @@ class PDFLocConverterCLI(object):
                             break  # let the loop process the parsed job before we read further
                         except ValueError as e:
                             print "Error parsing %s. Cause: %s" % (job, str(e))
+                            break
 
         return 0
 
