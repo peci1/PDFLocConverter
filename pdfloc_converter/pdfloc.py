@@ -6,7 +6,7 @@ __author__ = 'Martin Pecka'
 class PDFLoc(object):
     _regex_matcher = re.compile(
         r"#pdfloc\("
-            r"(?P<hash>[0-9a-h]+),"
+            r"(?P<hash>[0-9a-f]+),"
             r"(?P<page>[0-9]+),"
             r"(?P<keyword_num>[0-9]+|E),"
             r"(?P<string_num>[0-9]+|E),"
