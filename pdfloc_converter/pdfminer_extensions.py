@@ -132,9 +132,10 @@ class PDFLocPage(LTPage):
         self.index_in_layout_parent = 0
 
         i = 0
-        for child in self.groups:
-            self._set_as_layout_parent(self, child, i)
-            i += 1
+        if self.groups is not None:  # may be None for empty pages
+            for child in self.groups:
+                self._set_as_layout_parent(self, child, i)
+                i += 1
 
     def _set_as_layout_parent(self, parent, child, index_in_layout_parent):
         child.layout_parent = parent
