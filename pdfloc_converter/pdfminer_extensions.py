@@ -40,29 +40,27 @@ class PDFLocDocument(LTContainer):
 
         lines = [start_line]
 
-        if start_line == end_line:
-            return lines
-
-        node = start_line
-        i = 0
-        came_from_child = False
-        while node is not None and node != end_line and i < 100000:
-            if not came_from_child and len(node.layout_children) > 0 and isinstance(node.layout_children[0], LTContainer):
-                node = node.layout_children[0]
-                came_from_child = False
-                if isinstance(node, LTTextLine):
-                    lines.append(node)
-            elif node.layout_parent is not None and node.index_in_layout_parent < len(node.layout_parent.layout_children)-1:
-                node = node.layout_parent.layout_children[node.index_in_layout_parent+1]
-                came_from_child = False
-                if isinstance(node, LTTextLine):
-                    lines.append(node)
-            elif node.layout_parent is not None:
-                node = node.layout_parent
-                came_from_child = True
-            else:
-                raise RuntimeError("End line not found: %s" % str(node))
-            i += 1
+        if start_line != end_line:
+            node = start_line
+            i = 0
+            came_from_child = False
+            while node is not None and node != end_line and i < 100000:
+                if not came_from_child and len(node.layout_children) > 0 and isinstance(node.layout_children[0], LTContainer):
+                    node = node.layout_children[0]
+                    came_from_child = False
+                    if isinstance(node, LTTextLine):
+                        lines.append(node)
+                elif node.layout_parent is not None and node.index_in_layout_parent < len(node.layout_parent.layout_children)-1:
+                    node = node.layout_parent.layout_children[node.index_in_layout_parent+1]
+                    came_from_child = False
+                    if isinstance(node, LTTextLine):
+                        lines.append(node)
+                elif node.layout_parent is not None:
+                    node = node.layout_parent
+                    came_from_child = True
+                else:
+                    raise RuntimeError("End line not found: %s" % str(node))
+                i += 1
 
         if len(lines) == 0:
             raise RuntimeError("No lines found for: start '%s', end '%s'" % (str(start_char), str(end_char)))
