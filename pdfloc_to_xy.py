@@ -51,20 +51,8 @@ class PDFLocConverterCLI(object):
         converter.parse_document()
 
         # process all jobs, writing their results to stdout
-        while len(jobs) > 0:
-            job = jobs.popleft()
-
-            try:
-                if isinstance(job, PDFLocPair):
-                    bboxes = converter.pdfloc_pair_to_bboxes(job)
-                    print "\n".join([str(bbox).strip() for bbox in bboxes]) + "\n\n"
-                else:
-                    pdfloc_pair = converter.bboxes_to_pdfloc_pair(job)
-                    print str(pdfloc_pair) + "\n\n"
-            except KeyError as e:
-                print "Error converting %s. Cause: %s" % (job, repr(e))
-
-            # read more jobs from the input job file if specified
+        while True:
+            # read more jobs from the input job file if specified and all command-line jobs have been processed
             if len(jobs) == 0 and args.jobs_file is not None and not args.jobs_file.closed:
                 while True:
                     lines = []
@@ -87,6 +75,22 @@ class PDFLocConverterCLI(object):
                         except ValueError as e:
                             print "Error parsing %s. Cause: %s" % (job, str(e))
                             break
+
+            if len(jobs) == 0:
+                # quit the loop when there are really no more jobs to be done
+                break
+
+            job = jobs.popleft()
+
+            try:
+                if isinstance(job, PDFLocPair):
+                    bboxes = converter.pdfloc_pair_to_bboxes(job)
+                    print "\n".join([str(bbox).strip() for bbox in bboxes]) + "\n\n"
+                else:
+                    pdfloc_pair = converter.bboxes_to_pdfloc_pair(job)
+                    print str(pdfloc_pair) + "\n\n"
+            except KeyError as e:
+                print "Error converting %s. Cause: %s" % (job, repr(e))
 
         return 0
 
