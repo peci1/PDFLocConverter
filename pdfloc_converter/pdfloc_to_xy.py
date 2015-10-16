@@ -12,7 +12,12 @@ class PDFLocConverterCLI(object):
     def parse_pdfloc_or_bounding_box_from_string(self, string):
         string = string.strip()
         if string.startswith("#pdfloc"):
-            (start, end) = tuple(string.split(";"))
+            (start, end) = tuple(string.split(";", 2))
+            start = start.strip()  # strip whitespace
+
+            end = end.strip()  # strip whitespace
+            end = end.split(" ")[0]  # allow comments separated by a space at the end of the pdfloc
+
             return PDFLocPair(start, end)
         else:
             bboxes = []
@@ -92,7 +97,7 @@ running the conversions. After that, you specify the "jobs" - either pdflocs or 
 to be converted to the other type (you can mix both job types together in one call).
 
 The format of a pdfloc job is:
-    #pdfloc(abcd,1,1,1,1,1,1,1);#pdfloc(abcd,1,1,2,1,1,1,1)
+    #pdfloc(abcd,1,1,1,1,1,1,1);#pdfloc(abcd,1,1,2,1,1,1,1) optional comment separated by a space
 
 The format of bounding boxes job is:
     1,0,0,200,200;1,0,5,200,205;...
