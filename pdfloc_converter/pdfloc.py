@@ -77,21 +77,22 @@ class PDFLoc(object):
 
 
 class PDFLocPair(object):
-    def __init__(self, start, end):
+    def __init__(self, start, end, comment=None):
         super(PDFLocPair, self).__init__()
         self.start = PDFLoc(start)
         self.end = PDFLoc(end)
+        self.comment = comment
 
     @property
     def pages_covered(self):
         return range(self.start.page, self.end.page+1)
 
     def __str__(self):
-        return str(self.start) + ";" + str(self.end)
+        return str(self.start) + ";" + str(self.end) + ((" " + self.comment) if self.comment is not None else "")
 
 
 class PDFLocBoundingBoxes(object):
-    def __init__(self, bboxes, page=None):
+    def __init__(self, bboxes, page=None, comment=None):
         super(PDFLocBoundingBoxes, self).__init__()
 
         assert isinstance(bboxes, list)
@@ -104,9 +105,22 @@ class PDFLocBoundingBoxes(object):
         elif isinstance(bboxes[0], BoundingBoxOnPage):
             self.bboxes = bboxes
 
+        self._comment = comment
+
+    @property
+    def page(self):
+        return self.bboxes[0].page
+
     @property
     def pages_covered(self):
         return set([bbox.page for bbox in self.bboxes])
+
+    @property
+    def comment(self):
+        if self._comment is not None:
+            return self._comment
+        else:
+            return u"\n".join([bbox.text for bbox in self.bboxes])
 
 
 class BoundingBoxOnPage(object):
