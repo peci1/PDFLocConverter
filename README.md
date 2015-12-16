@@ -1,11 +1,11 @@
-PDFLoc converter
+PDFLoc Converter
 ================
 
-*PDFLoc converter* is an experimental Python library and utility to convert between Adobe's unpublished, but widely used **#pdfloc(...)** *PDF location* specifiers, and a list of bounding boxes.
+*PDFLoc Converter* is an experimental Python library and utility to convert between Adobe's unpublished, but widely used **#pdfloc(...)** *PDF location* specifiers, and a list of bounding boxes.
   
 This format is usually used by ebook readers (both harware and software) that utilize the Adobe Reader Mobile SDK (RMSDK) for handling PDF files.
 Adobe provides no free tool to parse or use these PDF location markers.
-This library tries to provide such a tool based on the free software pdfminer.
+This library tries to provide such a tool based on the free software [pdfminer](https://euske.github.io/pdfminer/).
 
 \#pdfloc format
 --------------
@@ -19,13 +19,14 @@ The author asked Adobe to provide a description, but no money, no success.
 So the following semantics description is only a best guess which was verified on a bunch of files.
 If you have some more ideas on the still unclear things or if you just have a pdfloc that doesn't work according to the described algorithm, please, raise an issue here on Github.
 
-**To understand the following description, the reader is required to know [some internals of the PDF format](http://partners.adobe.com/public/developer/en/pdf/PDFReference.pdf) (mainly to know there are some objects and streams /Sections 2.1.2 and 3/).**
+**To understand the following description, the reader is required to know [some internals of the PDF format](http://partners.adobe.com/public/developer/en/pdf/PDFReference.pdf) (mainly to know there are some objects and operators /Sections 2.1.2 and 3/).**
 
 Let us first name the elements in a pdfloc:
 
 `#pdfloc(hash, page, keyword_num, string_num, instring_num, flag1, is_up_to_end, is_not_up_to_end)`
 
-- **hash**: 4 hexadecimal digits that serve as a hash of the corresponding PDF document
+- **hash**: 4 hexadecimal digits that serve as a hash of the corresponding PDF document.
+            *PDFLoc Converter* ignores this value (although it could check if you're not trying to apply a pdfloc to a wrong document - this check is left up to the end user).
 - **page**: Page number. Indexed from 0.
 - **keyword\_num**: Position of the corresponding **Tj** (*show text string*) or **TJ** (*show more text strings*) operator in the content of the PDF object corresponding to the page (each page has one main content object related to it).
                    Indexed from 0.  
@@ -115,6 +116,4 @@ Usage
 Installation
 ------------
 
-### Linux (and probably Mac OS) ###
-
-### Windows ###
+1. [Install pdfminer](https://euske.github.io/pdfminer/#install).
