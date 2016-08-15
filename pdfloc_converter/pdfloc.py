@@ -75,6 +75,12 @@ class PDFLoc(object):
             self.is_up_to_end, self.is_not_up_to_end
         )
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 
 class PDFLocPair(object):
     def __init__(self, start, end, comment=None):
@@ -89,6 +95,14 @@ class PDFLocPair(object):
 
     def __str__(self):
         return str(self.start) + ";" + str(self.end) + ((" " + self.comment) if self.comment is not None else "")
+
+    def __eq__(self, other):
+        if not isinstance(other, PDFLocPair):
+            return NotImplemented
+        return self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
 
 class PDFLocBoundingBoxes(object):
@@ -120,11 +134,51 @@ class PDFLocBoundingBoxes(object):
         if self._comment is not None:
             return self._comment
         else:
-            return u"\n".join([bbox.text for bbox in self.bboxes])
+            result = u"\n".join([bbox.text for bbox in self.bboxes if bbox.text is not None])
+            if result is None:
+                return "Empty set of bounding boxes."
+            else:
+                return result
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        if len(self.bboxes) == 0:
+            return u"Empty bounding boxes"
+
+        result = u"Bounding boxes:\n"
+        for bbox in self.bboxes:
+            result += str(bbox)
+
+        if self._comment is not None:
+            result += u" with comment:\n%s" % self._comment
+        else:
+            result += u" without a comment"
+
+        return result
+
+    def __eq__(self, other):
+        if not isinstance(other, PDFLocBoundingBoxes):
+            return NotImplemented
+
+        if len(self.bboxes) != len(other.bboxes):
+            return False
+
+        return all([self.bboxes[i] == other.bboxes[i] for i in range(len(self.bboxes))])
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
 
 class BoundingBoxOnPage(object):
     def __init__(self, bbox, page, text=None):
+        """
+        Represent a bounding box.
+        :param tuple bbox: (x0, y0, x1, y1)
+        :param int page:
+        :param str text:
+        """
         super(BoundingBoxOnPage, self).__init__()
 
         assert isinstance(bbox, tuple)
@@ -135,9 +189,17 @@ class BoundingBoxOnPage(object):
         self.text = text
 
     def __repr__(self):
-        return "Page %i, '%s', %s" % (self.page, str(self.bbox), self.text.encode("ascii", "ignore"))
+        return "Page %i, '%s', %s" % (self.page, str(self.bbox),
+                                      self.text.encode("ascii", "ignore") if self.text is not None else "")
 
     def __str__(self):
         return self.__repr__()
 
+    def __eq__(self, other):
+        if not isinstance(other, BoundingBoxOnPage):
+            return NotImplemented
+        return self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
