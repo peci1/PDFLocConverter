@@ -9,7 +9,7 @@ from pdfminer.pdftypes import stream_value, list_value, dict_value
 from pdfminer.psparser import literal_name, STRICT
 from pdfminer.utils import MATRIX_IDENTITY, mult_matrix
 
-from pdfloc_converter.pdfloc import BoundingBoxOnPage
+from pdfloc_converter.pdfloc import BoundingBoxOnPage, BoundingBox, Point
 
 __author__ = 'Martin Pecka'
 
@@ -71,8 +71,14 @@ class PDFLocDocument(LTContainer):
             bboxes.append(BoundingBoxOnPage(line.bbox, pageid, line.get_text()))
 
         # the first and last lines are not selected completely (note that this also works on a single line)
-        bboxes[0].bbox = start_char.bbox[:2] + bboxes[0].bbox[2:]
-        bboxes[len(bboxes)-1].bbox = bboxes[len(bboxes)-1].bbox[:2] + end_char.bbox[2:]
+        bboxes[0].bbox = BoundingBox(
+            start=Point(*start_char.bbox[:2]),
+            end=Point(*bboxes[0].bbox[2:])
+        )
+        bboxes[len(bboxes)-1].bbox = BoundingBox(
+            start=Point(*bboxes[len(bboxes) - 1].bbox[:2]),
+            end=Point(*end_char.bbox[2:])
+        )
 
         start_i = start_char.index_in_layout_parent
         end_i = end_char.index_in_layout_parent

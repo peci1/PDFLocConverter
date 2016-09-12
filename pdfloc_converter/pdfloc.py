@@ -175,16 +175,23 @@ class BoundingBoxOnPage(object):
     def __init__(self, bbox, page, text=None):
         """
         Represent a bounding box.
-        :param tuple bbox: (x0, y0, x1, y1)
+        :param tuple|BoundingBox bbox: (x0, y0, x1, y1)
         :param int page:
         :param str text:
         """
         super(BoundingBoxOnPage, self).__init__()
 
-        assert isinstance(bbox, tuple)
+        assert isinstance(bbox, tuple) or isinstance(bbox, BoundingBox)
         assert isinstance(page, int)
 
-        self.bbox = bbox
+        if isinstance(bbox, BoundingBox):
+            self.bbox = bbox
+        else:
+            self.bbox = BoundingBox(
+                start=Point(x=bbox[0], y=bbox[1]),
+                end=Point(x=bbox[2], y=bbox[3])
+            )
+
         self.page = page
         self.text = text
 
@@ -203,3 +210,133 @@ class BoundingBoxOnPage(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
+
+class BoundingBox(object):
+    _start = None
+    _end = None
+
+    def __init__(self, start, end):
+        super(BoundingBox, self).__init__()
+
+        assert isinstance(start, Point)
+        assert isinstance(end, Point)
+
+        self._start = start
+        self._end = end
+
+    @property
+    def start(self):
+        return self._start
+
+    @property
+    def end(self):
+        return self._end
+
+    def width(self):
+        return self.end.x - self.start.x
+
+    def height(self):
+        return self.start.y - self.end.y  # y axis is inverted in PDF
+
+    def __str__(self):
+        return "Bbox[start=%s, end=%s]" % (self.start, self.end)
+
+    def __eq__(self, other):
+        if not isinstance(other, BoundingBox):
+            return NotImplemented
+        return self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __getitem__(self, i):
+        if i == 0:
+            return self.start.x
+        elif i == 1:
+            return self.start.y
+        elif i == 2:
+            return self.end.x
+        elif i == 3:
+            return self.end.y
+        elif isinstance(i, slice):
+            return [self[ii] for ii in range(*i.indices(len(self)))]
+        else:
+            raise IndexError()
+
+    def __len__(self):
+        return 4
+
+
+class PointOnPage(object):
+    def __init__(self, point, page):
+        """
+        Represent a point on a page.
+        :param tuple|Point point: (x, y)
+        :param int page:
+        """
+        super(PointOnPage, self).__init__()
+
+        assert isinstance(point, tuple) or isinstance(point, Point)
+        assert isinstance(page, int)
+
+        if isinstance(point, Point):
+            self.point = point
+        else:
+            self.point = Point(x=point[0], y=point[1])
+
+        self.page = page
+
+    def __repr__(self):
+        return "Page %i, '%s'" % (self.page, str(self.point))
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __eq__(self, other):
+        if not isinstance(other, PointOnPage):
+            return NotImplemented
+        return self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+
+class Point(object):
+    _x = 0.0
+    _y = 0.0
+
+    def __init__(self, x, y):
+        super(Point, self).__init__()
+
+        self._x = x
+        self._y = y
+
+    @property
+    def x(self):
+        return self._x
+
+    @property
+    def y(self):
+        return self._y
+
+    def __str__(self):
+        return "[%f, %f]" % (self.x, self.y)
+
+    def __eq__(self, other):
+        if not isinstance(other, Point):
+            return NotImplemented
+        return self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __getitem__(self, i):
+        if i == 0:
+            return self.x
+        elif i == 1:
+            return self.y
+        else:
+            raise IndexError()
+
+    def __len__(self):
+        return 2
